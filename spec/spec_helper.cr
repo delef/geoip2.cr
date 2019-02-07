@@ -1,5 +1,5 @@
 require "spec"
-require "../src/maxminddb"
+require "../src/geoip2"
 
 def db_path(name : String)
   "spec/data/test-data/#{name}.mmdb"
