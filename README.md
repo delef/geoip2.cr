@@ -1,4 +1,4 @@
-# MaxMindDB.cr
+# GeoIP2.cr
 [![Built with Crystal](https://img.shields.io/badge/built%20with-crystal-000000.svg?style=flat-square)](https://crystal-lang.org/)
 [![Build Status](https://api.travis-ci.org/delef/geoip2.cr.svg)](https://travis-ci.org/delef/geoip2.cr)
 [![Releases](https://img.shields.io/github/release/delef/geoip2.cr.svg?style=flat-square)](https://github.com/delef/geoip2.cr/releases)
@@ -130,6 +130,7 @@ record.ip_address # => "128.101.101.101"
 
 ## Links
 
+ - MaxMind DB reader https://github.com/delef/maxminddb.cr
  - MaxMind DB file format specification http://maxmind.github.io/MaxMind-DB/
  - MaxMind test/sample DB files https://github.com/maxmind/MaxMind-DB
  - GeoLite2 Free Downloadable Databases http://dev.maxmind.com/geoip/geoip2/geolite2/
