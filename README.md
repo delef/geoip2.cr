@@ -1,9 +1,9 @@
 # MaxMindDB.cr
 [![Built with Crystal](https://img.shields.io/badge/built%20with-crystal-000000.svg?style=flat-square)](https://crystal-lang.org/)
-[![Build Status](https://api.travis-ci.org/delef/maxminddb.cr.svg)](https://travis-ci.org/delef/maxminddb.cr)
-[![Releases](https://img.shields.io/github/release/delef/maxminddb.cr.svg?style=flat-square)](https://github.com/delef/maxminddb.cr/releases)
+[![Build Status](https://api.travis-ci.org/delef/geoip2.cr.svg)](https://travis-ci.org/delef/geoip2.cr)
+[![Releases](https://img.shields.io/github/release/delef/geoip2.cr.svg?style=flat-square)](https://github.com/delef/geoip2.cr/releases)
 
-Pure Crystal [MaxMind DB](http://maxmind.github.io/MaxMind-DB/) reader, which doesn't require [libmaxminddb](https://github.com/maxmind/libmaxminddb).
+Pure Crystal GeoIP2 [databases](http://dev.maxmind.com/geoip/geoip2/downloadable) reader.
 
 ## Installation
 
@@ -11,44 +11,123 @@ Add this to your application's `shard.yml`:
 
 ```yaml
 dependencies:
-  maxminddb:
-    github: delef/maxminddb.cr
+  geoip2:
+    github: delef/geoip2.cr
 ```
 
 ## Usage
 
+### City Example ###
 ```crystal
-require "maxminddb"
+require "geoip2"
 
-mmdb = MaxMindDB.open("#{__DIR__}/../data/GeoLite2-City.mmdb")
-result = mmdb.get("1.1.1.1")
+reader = GeoIP2.open("/path/to/GeoLite2-City.mmdb", ["en", "ru", "de"])
+record = reader.city("128.101.101.101")
 
-result["city"]["geoname_id"].as_i # => 2151718
-result["city"]["names"]["en"].as_s # => "Research"
+record.city.geoname_id # => 5045360
+record.city.name # => "Minneapolis"
+record.city.name("ru") # => "Миннеаполис"
 
-result["continent"]["code"].as_s # => "OC"
-result["continent"]["geoname_id"].as_i # => 6255151
-result["continent"]["names"]["en"].as_s # => "Oceania"
+record.continent.code # => "NA"
+record.continent.name # => "North America"
 
-result["country"]["iso_code"].as_s # => "AU"
-result["country"]["geoname_id"].as_i # => 2077456
-result["country"]["names"]["en"].as_s # => "Australia"
+record.country.iso_code # => "US"
+record.country.in_european_union? # => false
+record.country.name # => "United States"
+record.country.name("de") # => "USA"
 
-result["location"]["accuracy_radius"].as_i # => 1000
-result["location"]["latitude"].as_f # => -37.7
-result["location"]["longitude"].as_f # => 145.1833
-result["location"]["time_zone"].as_s # => "Australia/Melbourne"
+record.location.accuracy_radius # => 20
+record.location.latitude # => 44.9532
+record.location.longitude # => -93.158
+record.location.metro_code # => 613
+record.location.time_zone # => "America/Chicago"
 
-result["postal"]["code"].as_s # => "3095"
+record.postal.code # => "55104"
 
-result["registered_country"]["iso_code"].as_s # => "AU"
-result["registered_country"]["geoname_id"].as_i # => 2077456
-result["registered_country"]["names"]["en"].as_s # => "Australia"
+record.registered_country.iso_code # => "US"
+record.registered_country.name # => "United States"
 
-result["subdivisions"][0]["iso_code"].as_s # => "VIC"
-result["subdivisions"][0]["geoname_id"].as_i # => 2145234
-result["subdivisions"][0]["names"]["en"].as_s # => "Victoria"
+record.subdivisions[0].iso_code # => "MN"
+record.subdivisions[0].name # => "Minnesota"
 ```
+
+### Anonymous IP Example ###
+```crystal
+require "geoip2"
+
+reader = GeoIP2.open("/path/to/GeoIP2-Anonymous-IP.mmdb")
+record = reader.anonymous_ip("128.101.101.101")
+
+record.anonymous? # => false
+record.anonymous_vpn? # => false
+record.hosting_provider? # => false
+record.public_proxy? # => false
+record.tor_exit_node? # => false
+record.ip_address # => "128.101.101.101"
+```
+
+### Connection-Type Example ###
+```crystal
+require "geoip2"
+
+reader = GeoIP2.open("/path/to/GeoIP2-Connection-Type.mmdb")
+record = reader.connection_type("128.101.101.101")
+
+record.connection_type # => "Corporate"
+record.ip_address # => "128.101.101.101"
+```
+
+### Domain Example ###
+```crystal
+require "geoip2"
+
+reader = GeoIP2.open("/path/to/GeoIP2-Domain.mmdb")
+record = reader.domain("128.101.101.101")
+
+record.domain # => "umn.edu"
+record.ip_address # => "128.101.101.101"
+```
+
+### Enterprise Example ###
+```crystal
+require "geoip2"
+
+reader = GeoIP2.open("/path/to/GeoIP2-Enterprise.mmdb", ["en", "zh-CN"])
+record = reader.enterprise("128.101.101.101")
+
+record.city.confidence # => 60
+record.city.name # => "Minneapolis"
+
+record.country.confidence # => 99
+record.country.iso_code # => "US"
+record.country.name # => "United States"
+record.country.name("zh-CN") # => "美国"
+
+record.subdivisions[0].confidence # => 77
+record.subdivisions[0].name # => "Minnesota"
+record.subdivisions[0].iso_code # => "MN"
+
+record.postal.code # => "55455"
+
+record.location.accuracy_radius # => 50
+record.location.latitude # => 44.9733
+record.location.longitude # => -93.2323
+```
+
+### ISP Example ###
+```crystal
+require "geoip2"
+
+reader = GeoIP2.open("/path/to/GeoIP2-ISP.mmdb")
+record = reader.isp("128.101.101.101")
+
+record.autonomous_system_number # => 217
+record.autonomous_system_organization # => "University of Minnesota"
+record.isp # => "University of Minnesota"
+record.organization # => "University of Minnesota"
+record.ip_address # => "128.101.101.101"
+```
+
 ## Links
 
  - MaxMind DB file format specification http://maxmind.github.io/MaxMind-DB/
@@ -57,7 +136,7 @@ result["subdivisions"][0]["names"]["en"].as_s # => "Victoria"
 
 ## Contributing
 
-1. Fork it ( https://github.com/delef/maxminddb.cr/fork )
+1. Fork it ( https://github.com/delef/geoip2.cr/fork )
 2. Create your feature branch (git checkout -b my-new-feature)
 3. Commit your changes (git commit -am 'Add some feature')
 4. Push to the branch (git push origin my-new-feature)

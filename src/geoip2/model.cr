@@ -7,38 +7,29 @@ module GeoIP2::Model
     def initialize(@raw : MaxMindDB::Any, @locales : Array(String), @ip_address : String)
     end
 
-    macro def_records(*properties)
-      {% for property in properties %}
-        {% property_type = "Record::#{property.stringify.camelcase.id}".id %}
-
-        def {{property.id}} : {{property_type}}
-          {{property_type}}.new(data({{property.stringify}}), @locales, @ip_address)
-        end
-      {% end %}
-    end
-    
     protected def data(key : String)
       @raw[key]? || MaxMindDB::Any.new({} of String => MaxMindDB::Any)
     end
   end
 
   abstract struct BaseCountry < BaseModel
-    def_records(
-      continent,
-      country,
-      registered_country,
-      represented_country,
-      maxmind,
-      traits
-    )
+    {% for method in %w(continent country registered_country represented_country maxmind traits) %}
+      {% method_type = "Record::#{method.camelcase.id}".id %}
+
+      def {{method.id}} : {{method_type}}
+        {{method_type}}.new(data({{method}}), @locales, @ip_address)
+      end
+    {% end %}
   end
 
   abstract struct BaseCity < BaseCountry
-    def_records(
-      city,
-      location,
-      postal
-    )
+    {% for method in %w(city location postal) %}
+      {% method_type = "Record::#{method.camelcase.id}".id %}
+
+      def {{method.id}} : {{method_type}}
+        {{method_type}}.new(data({{method}}), @locales, @ip_address)
+      end
+    {% end %}
 
     def subdivisions
       subdivisions = [] of Record::Subdivision
@@ -48,7 +39,7 @@ module GeoIP2::Model
           subdivisions << Record::Subdivision.new(subdivision, @locales, @ip_address)
         end
       end
-      
+
       subdivisions
     end
   end
@@ -66,20 +57,14 @@ module GeoIP2::Model
   end
 
   abstract struct SimpleModel < BaseModel
-    def initialize(@raw : MaxMindDB::Any, @locales : Array(String), @ip_address : String)        
+    def initialize(@raw : MaxMindDB::Any, @locales : Array(String), @ip_address : String)
       @traits = Record::Traits.new(@raw, @locales, @ip_address)
     end
 
-    macro def_traits(*properties)
-      {% for property in properties %}
-        {% unless property.type.names.includes?(Bool.id) %}
-          def {{property.var}}? : Bool
-            @traits.{{property.var}}?
-          end
-        {% end %}
-        
-        def {{property.var}} : {{property.type}}
-          @traits.{{property.var}}
+    macro def_traits(*methods)
+      {% for method in methods %}
+        def {{method.id}}
+          @traits.{{method.id}}
         end
       {% end %}
     end
@@ -87,39 +72,39 @@ module GeoIP2::Model
 
   struct AnonymousIp < SimpleModel
     def_traits(
-      anonymous? : Bool,
-      anonymous_vpn? : Bool,
-      hosting_provider? : Bool,
-      public_proxy? : Bool,
-      tor_exit_node? : Bool
+      :anonymous?,
+      :anonymous_vpn?,
+      :hosting_provider?,
+      :public_proxy?,
+      :tor_exit_node?
     )
   end
 
   struct Asn < SimpleModel
     def_traits(
-      autonomous_system_number : Int32,
-      autonomous_system_organization : String
+      :autonomous_system_number,
+      :autonomous_system_organization
     )
   end
 
   struct ConnectionType < SimpleModel
     def_traits(
-      connection_type : String
+      :connection_type
     )
   end
 
   struct Domain < SimpleModel
     def_traits(
-      domain : String
+      :domain
     )
   end
 
   struct Isp < SimpleModel
     def_traits(
-      isp : String,
-      organization : String,
-      autonomous_system_number : Int32,
-      autonomous_system_organization : String
+      :isp,
+      :organization,
+      :autonomous_system_number,
+      :autonomous_system_organization
     )
   end
 

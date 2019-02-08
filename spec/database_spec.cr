@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-describe GeoIP2 do
+describe GeoIP2::Database do
   it "name from default locale" do
     database = GeoIP2.open(db_path("GeoIP2-City-Test"))
     record = database.city("81.2.69.160")
@@ -41,12 +41,14 @@ describe GeoIP2 do
   it "incorrect database type" do
     database = GeoIP2.open(db_path("GeoIP2-City-Test"))
 
-    expect_raises(ArgumentError, "The 'country' method cannot be used with the 'GeoIP2-City' database") do
-      database.country("81.2.69.160")
-    end
-    expect_raises(ArgumentError, "The 'domain' method cannot be used with the 'GeoIP2-City' database") do
-      database.domain("81.2.69.160")
-    end
+    {% for db_type in %w(country domain enterprise) %}
+      message = "The '{{db_type.id}}' method cannot be used with" +
+                " the '#{database.metadata.database_type}' database"
+
+      expect_raises(ArgumentError, message) do
+        database.{{db_type.id}}("81.2.69.160")
+      end
+    {% end %}
   end
 
   it "incorrect ip address" do
@@ -99,10 +101,20 @@ describe GeoIP2 do
     record = database.enterprise("74.209.24.0")
 
     record.city.confidence.should eq(11)
+    record.city.geoname_id.should eq(5112335)
+
     record.country.confidence.should eq(99)
     record.country.geoname_id.should eq(6252001)
     record.country.in_european_union?.should be_false
+
+    record.registered_country.confidence.should be_nil
+    record.registered_country.geoname_id.should eq(6252001)
     record.registered_country.in_european_union?.should be_false
+
+    record.subdivisions[0].confidence.should eq(93)
+    record.subdivisions[0].geoname_id.should eq(5128638)
+    record.subdivisions[0].in_european_union?.should be_false
+
     record.location.accuracy_radius.should eq(27)
     record.traits.connection_type.should eq("Cable/DSL")
     record.traits.legitimate_proxy?.should be_true

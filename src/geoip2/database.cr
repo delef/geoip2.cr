@@ -51,10 +51,6 @@ module GeoIP2
       @reader.metadata
     end
 
-    def inspect(io)
-      @reader.inspect(io)
-    end
-
     private macro model(name, database_type, ip_address)
       unless metadata.database_type.includes?({{database_type}})
         raise ArgumentError.new(

@@ -7,34 +7,36 @@ module GeoIP2::Record
     end
 
     def inspect(io)
-      @raw.inspect(io)
-    end
+      data = {} of String => MaxMindDB::Any
 
-    private TYPE_MAP = {
-      Int32   => :as_i,
-      Float64 => :as_f,
-      String  => :as_s,
-    }
+      @raw.as_h.each do |k, v|
+        k = k.lchop("is_") + "?" if k.includes?("is_")
+        data[k] = v
+      end
+
+      data.inspect(io)
+    end
 
     macro mapping(*properties)
       {% for property in properties %}
-        {% if property.type.names.includes?(Bool.id) %}
+        {% if property.type.stringify == "Bool" %}
           def {{property.var}} : Bool
-            {% if property.var.stringify.includes?('?') %}
-              key = "is_#{{{property.var.stringify.gsub(/\?/, "")}}}"
-            {% else %}
-              key = {{property.var.stringify}}
-            {% end %}
-            
+            key = "is_#{{{property.var.stringify.gsub(/\?/, "")}}}"
             @raw[key]?.try(&.as_bool) || false
           end
         {% else %}
-          def {{property.var}}? : Bool
-            @raw.as_h.has_key?({{property.var.stringify}})
-          end
-
-          def {{property.var}} : {{property.type}}
-            @raw[{{property.var.stringify}}].{{TYPE_MAP[property.type].id}}
+          def {{property.var}} : {{property.type}}?
+            if value = @raw[{{property.var.stringify}}]?
+              {% if property.type.stringify == "Int32" %}
+                value.as_i? || value.as_s?.try &.to_i32
+              {% elsif property.type.stringify == "Float64" %}
+                value.as_f? || value.as_s?.try &.to_f64
+              {% elsif property.type.stringify == "String" %}
+                value.as_s?
+              {% else %}
+                value
+              {% end %}
+            end
           end
         {% end %}
       {% end %}
@@ -42,13 +44,9 @@ module GeoIP2::Record
   end
 
   abstract struct PlaceRecord < BaseRecord
-    def names? : Bool
-      @raw.as_h.has_key?("names")
-    end
-    
     def names : Hash(String, String)
-      if names?
-        @raw["names"].as_h.transform_values &.as_s
+      if names = @raw["names"]?
+        names.as_h.transform_values &.as_s
       else
         {} of String => String
       end
@@ -113,7 +111,7 @@ module GeoIP2::Record
     mapping(
       confidence : Int32,
       geoname_id : Int32,
-      in_european_union : Bool,
+      in_european_union? : Bool,
       iso_code : String
     )
   end
