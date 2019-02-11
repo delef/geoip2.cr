@@ -59,10 +59,6 @@ module GeoIP2::Record
         end
       end
     end
-
-    def name(locale : String) : String?
-      names[locale]?
-    end
   end
 
   struct City < PlaceRecord

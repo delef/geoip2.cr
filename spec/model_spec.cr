@@ -11,7 +11,8 @@ describe GeoIP2::Model do
       model.country.geoname_id.should eq(2635167)
       model.country.in_european_union?.should be_true
       model.country.name.should eq("United Kingdom")
-      model.country.name("fr").should eq("Royaume-Uni")
+      model.country.locales.should contain("fr")
+      model.country.names["fr"].should eq("Royaume-Uni")
     end
 
     it "registered_country record" do
@@ -19,14 +20,14 @@ describe GeoIP2::Model do
       model.registered_country.in_european_union?.should be_true
       model.registered_country.iso_code.should eq("FR")
       model.registered_country.name.should eq("France")
-      model.registered_country.name("fr").should eq("France")
+      model.registered_country.names["fr"].should eq("France")
     end
 
     it "continent record" do
       model.continent.geoname_id.should eq(6255148)
       model.continent.code.should eq("EU")
       model.continent.name.should eq("Europe")
-      model.continent.name("fr").should eq("Europe")
+      model.continent.names["fr"].should eq("Europe")
     end
   end
 
@@ -38,14 +39,14 @@ describe GeoIP2::Model do
     it "city record" do
       model.city.geoname_id.should eq(2038180)
       model.city.name.should eq("長春市")
-      model.city.name("de").should eq("Chángchūn")
+      model.city.names["de"].should eq("Chángchūn")
     end
 
     it "country record" do
       model.country.geoname_id.should eq(1814991)
       model.country.in_european_union?.should be_false
       model.country.name.should eq("中国")
-      model.country.name("de").should eq("China")
+      model.country.names["de"].should eq("China")
     end
 
     it "registered_country record" do
@@ -53,14 +54,14 @@ describe GeoIP2::Model do
       model.registered_country.in_european_union?.should be_false
       model.registered_country.iso_code.should eq("CN")
       model.registered_country.name.should eq("中国")
-      model.registered_country.name("de").should eq("China")
+      model.registered_country.names["de"].should eq("China")
     end
 
     it "continent record" do
       model.continent.geoname_id.should eq(6255147)
       model.continent.code.should eq("AS")
       model.continent.name.should eq("アジア")
-      model.continent.name("de").should eq("Asien")
+      model.continent.names["de"].should eq("Asien")
     end
 
     it "postal record" do
@@ -77,7 +78,7 @@ describe GeoIP2::Model do
       model.city.confidence.should eq(40)
       model.city.geoname_id.should eq(5803556)
       model.city.name.should eq("Milton")
-      model.city.name("ru").should eq("Мильтон")
+      model.city.names["ru"].should eq("Мильтон")
     end
 
     it "country record" do
@@ -85,7 +86,7 @@ describe GeoIP2::Model do
       model.country.geoname_id.should eq(6252001)
       model.country.in_european_union?.should be_false
       model.country.name.should eq("United States")
-      model.country.name("ru").should eq("США")
+      model.country.names["ru"].should eq("США")
     end
 
     it "registered_country record" do
@@ -94,14 +95,14 @@ describe GeoIP2::Model do
       model.registered_country.in_european_union?.should be_true
       model.registered_country.iso_code.should eq("GB")
       model.registered_country.name.should eq("United Kingdom")
-      model.registered_country.name("ru").should eq("Великобритания")
+      model.registered_country.names["ru"].should eq("Великобритания")
     end
 
     it "continent record" do
       model.continent.geoname_id.should eq(6255149)
       model.continent.code.should eq("NA")
       model.continent.name.should eq("North America")
-      model.continent.name("ru").should eq("Северная Америка")
+      model.continent.names["ru"].should eq("Северная Америка")
     end
 
     it "location record" do
@@ -124,7 +125,7 @@ describe GeoIP2::Model do
       model.subdivisions[0].geoname_id.should eq(5815135)
       model.subdivisions[0].iso_code.should eq("WA")
       model.subdivisions[0].name.should eq("Washington")
-      model.subdivisions[0].name("ru").should eq("Вашингтон")
+      model.subdivisions[0].names["ru"].should eq("Вашингтон")
     end
 
     it "traits record" do

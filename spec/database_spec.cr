@@ -13,6 +13,8 @@ describe GeoIP2::Database do
     record = database.city("81.2.69.160")
 
     record.country.name.should eq("Великобритания")
+    record.country.names.keys.should contain("zh-CN")
+    record.country.names["zh-CN"].should eq("英国")
   end
 
   it "traits has ip_address" do

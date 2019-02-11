@@ -17,6 +17,25 @@ dependencies:
 
 ## Usage
 
+### Country Example ###
+```crystal
+require "geoip2"
+
+reader = GeoIP2.open("/path/to/GeoLite2-Country.mmdb", ["en", "ru", "de"])
+record = reader.country("128.101.101.101")
+
+record.country.iso_code # => "US"
+record.country.in_european_union? # => false
+record.country.name # => "United States"
+record.country.names["de"] # => "USA"
+
+record.continent.code # => "NA"
+record.continent.name # => "North America"
+
+record.registered_country.iso_code # => "US"
+record.registered_country.name # => "United States"
+```
+
 ### City Example ###
 ```crystal
 require "geoip2"
@@ -26,15 +45,15 @@ record = reader.city("128.101.101.101")
 
 record.city.geoname_id # => 5045360
 record.city.name # => "Minneapolis"
-record.city.name("ru") # => "Миннеаполис"
-
-record.continent.code # => "NA"
-record.continent.name # => "North America"
+record.city.names["ru"] # => "Миннеаполис"
 
 record.country.iso_code # => "US"
 record.country.in_european_union? # => false
 record.country.name # => "United States"
-record.country.name("de") # => "USA"
+record.country.names["de"] # => "USA"
+
+record.continent.code # => "NA"
+record.continent.name # => "North America"
 
 record.location.accuracy_radius # => 20
 record.location.latitude # => 44.9532
@@ -49,6 +68,33 @@ record.registered_country.name # => "United States"
 
 record.subdivisions[0].iso_code # => "MN"
 record.subdivisions[0].name # => "Minnesota"
+```
+
+### Enterprise Example ###
+```crystal
+require "geoip2"
+
+reader = GeoIP2.open("/path/to/GeoIP2-Enterprise.mmdb", ["en", "zh-CN"])
+record = reader.enterprise("128.101.101.101")
+
+record.city.name # => "Minneapolis"
+record.city.confidence # => 60
+
+record.country.iso_code # => "US"
+record.country.name # => "United States"
+record.country.names["zh-CN"] # => "美国"
+record.country.confidence # => 99
+
+record.subdivisions[0].name # => "Minnesota"
+record.subdivisions[0].iso_code # => "MN"
+record.subdivisions[0].confidence # => 77
+
+record.postal.code # => "55455"
+record.postal.confidence # => "55455"
+
+record.location.latitude # => 44.9733
+record.location.longitude # => -93.2323
+record.location.accuracy_radius # => 50
 ```
 
 ### Anonymous IP Example ###
@@ -86,32 +132,6 @@ record = reader.domain("128.101.101.101")
 
 record.domain # => "umn.edu"
 record.ip_address # => "128.101.101.101"
-```
-
-### Enterprise Example ###
-```crystal
-require "geoip2"
-
-reader = GeoIP2.open("/path/to/GeoIP2-Enterprise.mmdb", ["en", "zh-CN"])
-record = reader.enterprise("128.101.101.101")
-
-record.city.confidence # => 60
-record.city.name # => "Minneapolis"
-
-record.country.confidence # => 99
-record.country.iso_code # => "US"
-record.country.name # => "United States"
-record.country.name("zh-CN") # => "美国"
-
-record.subdivisions[0].confidence # => 77
-record.subdivisions[0].name # => "Minnesota"
-record.subdivisions[0].iso_code # => "MN"
-
-record.postal.code # => "55455"
-
-record.location.accuracy_radius # => 50
-record.location.latitude # => 44.9733
-record.location.longitude # => -93.2323
 ```
 
 ### ISP Example ###
