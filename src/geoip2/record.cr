@@ -21,8 +21,8 @@ module GeoIP2::Record
       {% for property in properties %}
         {% if property.type.stringify == "Bool" %}
           def {{property.var}} : Bool
-            key = "is_#{{{property.var.stringify.gsub(/\?/, "")}}}"
-            @raw[key]?.try(&.as_bool) || false
+            {% name = property.var.stringify.gsub(/\?/, "") %}
+            @raw["is_{{name.id}}"]?.try(&.as_bool) || false
           end
         {% else %}
           def {{property.var}} : {{property.type}}?
