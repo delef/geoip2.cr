@@ -13,7 +13,6 @@ describe GeoIP2::Model do
       model.country.name.should eq("United Kingdom")
       model.country.locales.should contain("fr")
       model.country.names["fr"].should eq("Royaume-Uni")
-      model.country.empty?.should be_false
     end
 
     it "registered_country record" do
@@ -29,6 +28,30 @@ describe GeoIP2::Model do
       model.continent.code.should eq("EU")
       model.continent.name.should eq("Europe")
       model.continent.names["fr"].should eq("Europe")
+    end
+
+    it "#found?" do
+      model.empty?.should be_false
+
+      {% for method in %w(country registered_country continent) %}
+        model.{{method.id}}.found?.should be_true
+      {% end %}
+    end
+
+    it "#empty?" do
+      model.empty?.should be_false
+
+      {% for method in %w(country registered_country continent) %}
+        model.{{method.id}}.empty?.should be_false
+      {% end %}
+    end
+
+    it "#to_json" do
+      model.to_json.should eq(source_data[:json_any].to_json)
+
+      {% for method in %w(country registered_country continent) %}
+        model.{{method.id}}.to_json.should eq(source_data[:json_any][{{method}}].to_json)
+      {% end %}
     end
   end
 
@@ -80,6 +103,30 @@ describe GeoIP2::Model do
         model.most_specific_subdivision.name.should eq("West Berkshire")
         model.most_specific_subdivision.names["ru"].should eq("Западный Беркшир")
       end
+    end
+
+    it "#found?" do
+      model.empty?.should be_false
+
+      {% for method in %w(city country registered_country continent) %}
+        model.{{method.id}}.found?.should be_true
+      {% end %}
+    end
+
+    it "#empty?" do
+      model.empty?.should be_false
+
+      {% for method in %w(city country registered_country continent) %}
+        model.{{method.id}}.empty?.should be_false
+      {% end %}
+    end
+
+    it "#to_json" do
+      model.to_json.should eq(source_data[:json_any].to_json)
+
+      {% for method in %w(city country registered_country continent subdivisions) %}
+        model.{{method.id}}.to_json.should eq(source_data[:json_any][{{method}}].to_json)
+      {% end %}
     end
   end
 
@@ -155,6 +202,30 @@ describe GeoIP2::Model do
       model.traits.organization.should eq("Lariat Software")
       model.traits.user_type.should eq("government")
     end
+
+    it "#found?" do
+      model.found?.should be_true
+
+      {% for method in %w(city country registered_country continent location postal traits) %}
+        model.{{method.id}}.found?.should be_true
+      {% end %}
+    end
+
+    it "#empty?" do
+      model.empty?.should be_false
+
+      {% for method in %w(city country registered_country continent location postal traits) %}
+        model.{{method.id}}.empty?.should be_false
+      {% end %}
+    end
+
+    it "#to_json" do
+      model.to_json.should eq(source_data[:json_any].to_json)
+
+      {% for method in %w(city country registered_country continent location postal subdivisions traits) %}
+        model.{{method.id}}.to_json.should eq(source_data[:json_any][{{method}}].to_json)
+      {% end %}
+    end
   end
 
   describe "AnonymousIp" do
@@ -162,12 +233,24 @@ describe GeoIP2::Model do
     source_data = source_model_data("GeoIP2-Anonymous-IP-Test", ip_address)
     model = GeoIP2::Model::AnonymousIp.new(source_data[:maxminddb_any], [] of String, ip_address)
 
-    it "anonymous_ip values must be boolean" do
+    it "basic" do
       model.anonymous?.should be_true
       model.anonymous_vpn?.should be_true
       model.hosting_provider?.should be_true
       model.public_proxy?.should be_true
       model.tor_exit_node?.should be_true
+    end
+
+    it "#found?" do
+      model.found?.should be_true
+    end
+
+    it "#empty?" do
+      model.empty?.should be_false
+    end
+
+    it "#to_json" do
+      model.to_json.should eq(source_data[:json_any].to_json)
     end
   end
 
@@ -176,9 +259,21 @@ describe GeoIP2::Model do
     source_data = source_model_data("GeoLite2-ASN-Test", ip_address)
     model = GeoIP2::Model::Asn.new(source_data[:maxminddb_any], [] of String, ip_address)
 
-    it "asn" do
+    it "basic" do
       model.autonomous_system_number.should eq(1221)
       model.autonomous_system_organization.should eq("Telstra Pty Ltd")
+    end
+
+    it "#found?" do
+      model.found?.should be_true
+    end
+
+    it "#empty?" do
+      model.empty?.should be_false
+    end
+
+    it "#to_json" do
+      model.to_json.should eq(source_data[:json_any].to_json)
     end
   end
 
@@ -187,8 +282,20 @@ describe GeoIP2::Model do
     source_data = source_model_data("GeoIP2-Connection-Type-Test", ip_address)
     model = GeoIP2::Model::ConnectionType.new(source_data[:maxminddb_any], [] of String, ip_address)
 
-    it "connection type" do
+    it "basic" do
       model.connection_type.should eq("Cable/DSL")
+    end
+
+    it "#found?" do
+      model.found?.should be_true
+    end
+
+    it "#empty?" do
+      model.empty?.should be_false
+    end
+
+    it "#to_json" do
+      model.to_json.should eq(source_data[:json_any].to_json)
     end
   end
 
@@ -197,8 +304,20 @@ describe GeoIP2::Model do
     source_data = source_model_data("GeoIP2-Domain-Test", ip_address)
     model = GeoIP2::Model::Domain.new(source_data[:maxminddb_any], [] of String, ip_address)
 
-    it "domain" do
+    it "basic" do
       model.domain.should eq("maxmind.com")
+    end
+
+    it "#found?" do
+      model.found?.should be_true
+    end
+
+    it "#empty?" do
+      model.empty?.should be_false
+    end
+
+    it "#to_json" do
+      model.to_json.should eq(source_data[:json_any].to_json)
     end
   end
 
@@ -207,11 +326,23 @@ describe GeoIP2::Model do
     source_data = source_model_data("GeoIP2-ISP-Test", ip_address)
     model = GeoIP2::Model::Isp.new(source_data[:maxminddb_any], [] of String, ip_address)
 
-    it "isp" do
+    it "basic" do
       model.autonomous_system_number.should eq(1221)
       model.autonomous_system_organization.should eq("Telstra Pty Ltd")
       model.isp.should eq("Telstra Internet")
       model.organization.should eq("Telstra Internet")
+    end
+
+    it "#found?" do
+      model.found?.should be_true
+    end
+
+    it "#empty?" do
+      model.empty?.should be_false
+    end
+
+    it "#to_json" do
+      model.to_json.should eq(source_data[:json_any].to_json)
     end
   end
 
@@ -220,9 +351,21 @@ describe GeoIP2::Model do
     source_data = source_model_data("GeoIP2-DensityIncome-Test", ip_address)
     model = GeoIP2::Model::DensityIncome.new(source_data[:maxminddb_any], [] of String, ip_address)
 
-    it "density income" do
+    it "basic" do
       model.average_income.should eq(32323)
       model.population_density.should eq(1232)
+    end
+
+    it "#found?" do
+      model.found?.should be_true
+    end
+
+    it "#empty?" do
+      model.empty?.should be_false
+    end
+
+    it "#to_json" do
+      model.to_json.should eq(source_data[:json_any].to_json)
     end
   end
 
@@ -231,11 +374,23 @@ describe GeoIP2::Model do
     source_data = source_model_data("GeoIP2-User-Count-Test", ip_address)
     model = GeoIP2::Model::UserCount.new(source_data[:maxminddb_any], [] of String, ip_address)
 
-    it "density income" do
+    it "basic" do
       model.ipv4.should be_empty
       model.ipv6["/32"].should eq(5)
       model.ipv6["/48"].should eq(2)
       model.ipv6["/64"].should eq(0)
+    end
+
+    it "#found?" do
+      model.found?.should be_true
+    end
+
+    it "#empty?" do
+      model.empty?.should be_false
+    end
+
+    it "#to_json" do
+      model.to_json.should eq(source_data[:json_any].to_json)
     end
   end
 end
