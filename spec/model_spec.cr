@@ -14,7 +14,6 @@ describe GeoIP2::Model do
       model.country.locales.should contain("fr")
       model.country.names["fr"].should eq("Royaume-Uni")
       model.country.empty?.should be_false
-      pp model.to_json
     end
 
     it "registered_country record" do
