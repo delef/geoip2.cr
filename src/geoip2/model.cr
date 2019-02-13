@@ -10,37 +10,60 @@ module GeoIP2::Model
     protected def data(key : String)
       @raw[key]? || MaxMindDB::Any.new({} of String => MaxMindDB::Any)
     end
+
+    macro def_records(*methods)
+      {% for method in methods %}
+        {% method_type = "Record::#{method.camelcase.id}".id %}
+
+        def {{method.id}} : {{method_type}}
+          {{method_type}}.new(data("{{method.id}}"), @locales, @ip_address)
+        end
+      {% end %}
+    end
+
+    macro method_missing(call)
+      @raw.{{call.name}}({{*call.args}})
+    end
   end
 
   abstract struct BaseCountry < BaseModel
-    {% for method in %w(continent country registered_country represented_country maxmind traits) %}
-      {% method_type = "Record::#{method.camelcase.id}".id %}
-
-      def {{method.id}} : {{method_type}}
-        {{method_type}}.new(data({{method}}), @locales, @ip_address)
-      end
-    {% end %}
+    def_records(
+      :continent,
+      :country,
+      :registered_country,
+      :represented_country,
+      :maxmind,
+      :traits
+    )
   end
 
   abstract struct BaseCity < BaseCountry
-    {% for method in %w(city location postal) %}
-      {% method_type = "Record::#{method.camelcase.id}".id %}
+    def_records(
+      :city,
+      :location,
+      :postal
+    )
 
-      def {{method.id}} : {{method_type}}
-        {{method_type}}.new(data({{method}}), @locales, @ip_address)
-      end
-    {% end %}
+    @subdivisions = [] of Record::Subdivision
 
-    def subdivisions
-      subdivisions = [] of Record::Subdivision
+    def subdivisions : Array(Record::Subdivision)
+      return @subdivisions unless @subdivisions.empty?
 
       if data = @raw["subdivisions"]?
         data.as_a.each do |subdivision|
-          subdivisions << Record::Subdivision.new(subdivision, @locales, @ip_address)
+          @subdivisions << Record::Subdivision.new(subdivision, @locales, @ip_address)
         end
       end
 
-      subdivisions
+      @subdivisions
+    end
+
+    def most_specific_subdivision : Record::Subdivision
+      if subdivisions.empty?
+        Record::Subdivision.new(data(""), @locales, @ip_address)
+      else
+        subdivisions[-1]
+      end
     end
   end
 

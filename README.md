@@ -21,7 +21,7 @@ dependencies:
 ```crystal
 require "geoip2"
 
-reader = GeoIP2.open("/path/to/GeoLite2-Country.mmdb", ["en", "ru", "de"])
+reader = GeoIP2.open("/path/to/GeoLite2-Country.mmdb")
 record = reader.country("128.101.101.101")
 
 record.country.iso_code # => "US"
@@ -74,7 +74,7 @@ record.subdivisions[0].name # => "Minnesota"
 ```crystal
 require "geoip2"
 
-reader = GeoIP2.open("/path/to/GeoIP2-Enterprise.mmdb", ["en", "zh-CN"])
+reader = GeoIP2.open("/path/to/GeoIP2-Enterprise.mmdb")
 record = reader.enterprise("128.101.101.101")
 
 record.city.name # => "Minneapolis"

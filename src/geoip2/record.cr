@@ -41,6 +41,10 @@ module GeoIP2::Record
         {% end %}
       {% end %}
     end
+
+    macro method_missing(call)
+      @raw.{{call.name}}({{*call.args}})
+    end
   end
 
   abstract struct PlaceRecord < BaseRecord
