@@ -63,7 +63,7 @@ describe GeoIP2::Model do
     it "city record" do
       model.city.geoname_id.should eq(2655045)
       model.city.name.should eq("Boxford")
-      model.city.names.has_key?("ja").should be_false
+      model.city.names.["ja"]?.should be_nil
     end
 
     it "country record" do
@@ -93,7 +93,7 @@ describe GeoIP2::Model do
         model.subdivisions[0].geoname_id.should eq(6269131)
         model.subdivisions[0].iso_code.should eq("ENG")
         model.subdivisions[0].name.should eq("England")
-        model.subdivisions[0].names.has_key?("ru").should be_false
+        model.subdivisions[0].names["ru"]?.should be_nil
         model.subdivisions[0].names["fr"].should eq("Angleterre")
       end
 
