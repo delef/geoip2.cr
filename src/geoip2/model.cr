@@ -8,7 +8,11 @@ module GeoIP2::Model
     end
 
     protected def data(key : String)
-      @raw[key]? || MaxMindDB::Any.new({} of String => MaxMindDB::Any)
+      @raw[key]? || empty_result
+    end
+
+    protected def empty_result
+      MaxMindDB::Any.new({} of String => MaxMindDB::Any)
     end
 
     macro def_records(*methods)
@@ -60,9 +64,9 @@ module GeoIP2::Model
 
     def most_specific_subdivision : Record::Subdivision
       if subdivisions.empty?
-        Record::Subdivision.new(data(""), @locales, @ip_address)
+        Record::Subdivision.new(empty_result, @locales, @ip_address)
       else
-        subdivisions[-1]
+        subdivisions.last
       end
     end
   end
@@ -132,20 +136,12 @@ module GeoIP2::Model
   end
 
   struct DensityIncome < SimpleModel
-    def average_income?
-      @raw.as_h.has_key? "average_income"
-    end
-
     def average_income
-      @raw["average_income"].as_i
-    end
-
-    def population_density?
-      @raw.as_h.has_key? "population_density"
+      @raw["average_income"]?.try &.as_i
     end
 
     def population_density
-      @raw["population_density"].as_i
+      @raw["population_density"]?.try &.as_i
     end
   end
 
