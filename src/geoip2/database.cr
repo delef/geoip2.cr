@@ -3,8 +3,8 @@ require "./model"
 
 module GeoIP2
   class Database
-    def initialize(db_path : String, @locales : Array(String))
-      @reader = MaxMindDB.open(db_path)
+    def initialize(db : String | Bytes | IO::Memory, @locales : Array(String))
+      @reader = MaxMindDB.open(db)
     end
 
     def city(ip_address : String)
@@ -66,7 +66,7 @@ module GeoIP2
                 "The address '#{ip_address}' is not in the database"
               )
       end
-      
+
       Model::{{name.id}}.new(record, @locales, ip_address)
     end
   end

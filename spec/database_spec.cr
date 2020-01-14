@@ -166,5 +166,23 @@ describe GeoIP2::Database do
       record.organization.should eq("Telstra Internet")
       record.ip_address.should eq("1.128.0.0")
     end
+
+    it "loads database from Bytes" do
+      bytes : Bytes = db_bytes("GeoIP2-Domain-Test")
+      database = GeoIP2.open(bytes)
+
+      record = database.domain("1.2.0.0")
+      record.domain.should eq("maxmind.com")
+      record.ip_address.should eq("1.2.0.0")
+    end
+
+    it "loads database from IO::Memory" do
+      memory = IO::Memory.new(db_bytes("GeoIP2-Domain-Test"))
+      database = GeoIP2.open(memory)
+
+      record = database.domain("1.2.0.0")
+      record.domain.should eq("maxmind.com")
+      record.ip_address.should eq("1.2.0.0")
+    end
   end
 end
