@@ -35,6 +35,8 @@ describe GeoIP2::Database do
   it "unknown ip address" do
     database = GeoIP2.open(db_path("GeoIP2-City-Test"))
 
+    database.city?("10.10.10.10").should be_nil
+
     expect_raises(GeoIP2::AddressNotFoundError, "The address '10.10.10.10' is not in the database") do
       database.city("10.10.10.10")
     end
