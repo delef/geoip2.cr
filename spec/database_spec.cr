@@ -35,6 +35,8 @@ describe GeoIP2::Database do
   it "unknown ip address" do
     database = GeoIP2.open(db_path("GeoIP2-City-Test"))
 
+    database.city?("10.10.10.10").should be_nil
+
     expect_raises(GeoIP2::AddressNotFoundError, "The address '10.10.10.10' is not in the database") do
       database.city("10.10.10.10")
     end
@@ -165,6 +167,24 @@ describe GeoIP2::Database do
       record.isp.should eq("Telstra Internet")
       record.organization.should eq("Telstra Internet")
       record.ip_address.should eq("1.128.0.0")
+    end
+
+    it "loads database from Bytes" do
+      bytes : Bytes = db_bytes("GeoIP2-Domain-Test")
+      database = GeoIP2.open(bytes)
+
+      record = database.domain("1.2.0.0")
+      record.domain.should eq("maxmind.com")
+      record.ip_address.should eq("1.2.0.0")
+    end
+
+    it "loads database from IO::Memory" do
+      memory = IO::Memory.new(db_bytes("GeoIP2-Domain-Test"))
+      database = GeoIP2.open(memory)
+
+      record = database.domain("1.2.0.0")
+      record.domain.should eq("maxmind.com")
+      record.ip_address.should eq("1.2.0.0")
     end
   end
 end

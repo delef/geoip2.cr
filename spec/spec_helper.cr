@@ -5,6 +5,19 @@ def db_path(name : String)
   "spec/data/test-data/#{name}.mmdb"
 end
 
+def db_bytes(name : String)
+  file = File.new(db_path(name), "rb")
+  bytes = Bytes.new(file.size)
+
+  begin
+    file.read_fully(bytes)
+  ensure
+    file.close
+  end
+
+  bytes
+end
+
 def source_model_data(file_name, ip_address)
   source_path = "spec/data/source-data/#{file_name}.json"
   source_data = File.read(source_path)
