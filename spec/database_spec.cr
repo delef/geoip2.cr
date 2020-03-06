@@ -58,7 +58,7 @@ describe GeoIP2::Database do
   it "incorrect ip address" do
     database = GeoIP2.open(db_path("GeoIP2-City-Test"))
 
-    expect_raises(ArgumentError, "Unknown IP address: incorrect") do
+    expect_raises(Socket::Error, "Invalid IP address: incorrect") do
       database.city("incorrect")
     end
   end
