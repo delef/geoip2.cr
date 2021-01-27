@@ -56,10 +56,11 @@ describe GeoIP2::Database do
   end
 
   it "incorrect ip address" do
+    iip = "incorrect"
     database = GeoIP2.open(db_path("GeoIP2-City-Test"))
 
-    expect_raises(Socket::Error, "Invalid IP address: incorrect") do
-      database.city("incorrect")
+    expect_raises(MaxMindDB::IPAddressError, "Unknown IP address: #{iip}") do
+      database.city(iip)
     end
   end
 
