@@ -5,7 +5,6 @@ license: MIT
 dependencies:
   maxminddb:
     github: delef/maxminddb.cr
-    branch: master
 
 authors:
   - delef <delef@ya.ru>
